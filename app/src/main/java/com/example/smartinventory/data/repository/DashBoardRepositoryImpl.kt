@@ -28,7 +28,7 @@ class DashBoardRepositoryImpl @Inject constructor(
         try {
             if (isInternetAvailable(context)) {
                 val response =
-                    webService.getProducts(AppConstants.PRODUCT_PATH) // Adjust endpoint path if needed
+                    webService.getProducts(AppConstants.PRODUCT_PATH)
                 if (response.isSuccessful) {
                     val products = response.body() ?: emptyList()
                     // Update the Room DB
@@ -43,7 +43,7 @@ class DashBoardRepositoryImpl @Inject constructor(
                             errorCode = response.code()
                         )
                     )
-                    // Fallback to local Storage
+                    // We fallback to local storage
                     var productList: List<Product> = listOf()
                     val localProducts = productDao.getAllProducts().first()
                     emit(ApiResponse.Success(localProducts.toProduct()))
@@ -55,6 +55,16 @@ class DashBoardRepositoryImpl @Inject constructor(
             }
         }
         catch (e: Exception) {
+            emit(ApiResponse.Failure(e, e.message))
+        }
+    }
+
+    override suspend fun getProductsFromLocal(): Flow<ApiResponse<List<Product>>> = flow {
+        val product = productDao.getAllProducts()
+        emit(ApiResponse.Loading)
+        try {
+            emit(ApiResponse.Success(product.first().toProduct()))
+        } catch (e: Exception) {
             emit(ApiResponse.Failure(e, e.message))
         }
     }

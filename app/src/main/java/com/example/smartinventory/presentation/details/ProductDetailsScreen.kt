@@ -1,5 +1,6 @@
 package com.example.smartinventory.presentation.details
 
+import android.net.Uri
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -18,11 +19,14 @@ import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.CircularProgressIndicator
 import androidx.compose.material.Icon
 import androidx.compose.material.IconButton
+import androidx.compose.material.Scaffold
+import androidx.compose.material.SnackbarHost
+import androidx.compose.material.SnackbarHostState
+import androidx.compose.material.SnackbarResult
 import androidx.compose.material.Text
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.ArrowBack
 import androidx.compose.material.icons.filled.Delete
-import androidx.compose.material.icons.filled.FavoriteBorder
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
@@ -30,6 +34,7 @@ import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -51,18 +56,22 @@ import coil.compose.AsyncImage
 import com.example.smartinventory.R
 import com.example.smartinventory.data.database.ProductsEntity
 import com.example.smartinventory.utils.ApiResponse
-import com.example.smartinventory.utils.Route
 import com.example.smartinventory.utils.Tools
+import com.example.smartinventory.utils.base.BaseViewModel
 
 @Composable
 fun ProductDetailsScreen(
     productId: Int,
     navController: NavController,
+    baseViewModel: BaseViewModel,
     productDetailsViewModel: ProductDetailsViewModel = hiltViewModel()
 ) {
 
     val productDetailsState by productDetailsViewModel.productDetails.collectAsState()
     var productDetails by remember { mutableStateOf<ProductsEntity?>(null) }
+    val deleteProductResponseState by productDetailsViewModel.deleteProductState.collectAsState()
+    val snackbarHostState = remember { SnackbarHostState() }
+    val coroutineScope = rememberCoroutineScope()
 
     //UI States
     var showDialog by remember { mutableStateOf(false) }
@@ -70,9 +79,15 @@ fun ProductDetailsScreen(
     var isSuccess by remember { mutableStateOf(true) }
     var context = LocalContext.current
 
-    LaunchedEffect(Unit) {
-        productDetailsViewModel.getProductsById(productId)
-    }
+
+    Scaffold (snackbarHost = { SnackbarHost(hostState = snackbarHostState) })
+    { innerPadding ->
+
+        LaunchedEffect(Unit) {
+            productDetailsViewModel.getProductsById(productId)
+        }
+
+
 
     when (val state = productDetailsState) {
         is ApiResponse.Idle -> {
@@ -105,12 +120,46 @@ fun ProductDetailsScreen(
         }
     }
 
+        LaunchedEffect(deleteProductResponseState) {
+            when (val deleteResponse = deleteProductResponseState) {
+                is ApiResponse.Idle -> {
+
+                }
+
+                is ApiResponse.Loading -> {
+
+                }
+
+                is ApiResponse.Success -> {
+                    val result = snackbarHostState.showSnackbar(
+                        message = "Product deleted",
+                        actionLabel = "OK"
+                    )
+                    if (result == SnackbarResult.ActionPerformed) {
+                        navController.popBackStack()
+                    } else {
+                        navController.popBackStack()
+                    }
+//                    navController.popBackStack()
+                    baseViewModel.setIsFromAddProduct(true)
+                }
+
+                is ApiResponse.Failure -> {
+                    showDialog = true
+                    isSuccess = false
+                    dialogMessage = deleteResponse.message ?: "Failed to Delete!"
+
+                }
+            }
+        }
+
     Column(
         modifier = Modifier
             .fillMaxSize()
             .padding(top = 20.dp)
             .verticalScroll(rememberScrollState())
             .background(Color.White)
+            .padding(innerPadding)
     ) {
         // Top Bar
         Row(
@@ -120,15 +169,17 @@ fun ProductDetailsScreen(
             horizontalArrangement = Arrangement.SpaceBetween,
             verticalAlignment = Alignment.CenterVertically
         ) {
-            IconButton(onClick = { navController.navigate(Route.DASHBOARD_SCREEN) }) {
+            IconButton(onClick = { navController.popBackStack() }) {
                 Icon(Icons.Default.ArrowBack, contentDescription = "Back")
             }
             Row {
-                IconButton(onClick = { navController.popBackStack() }) {
+                IconButton(onClick = {
+                    productDetails?.id?.let { productDetailsViewModel.deleteProductById(it) }
+                }) {
                     Icon(Icons.Default.Delete, contentDescription = "Delete")
                 }
                 IconButton(onClick = {
-
+                    navController.navigate("updateFoodScreen/${productDetails?.id}")
                 }) {
                     Icon(painterResource(R.drawable.ic_edit), contentDescription = "Edit")
                 }
@@ -136,9 +187,34 @@ fun ProductDetailsScreen(
         }
 
         // Product Image
-        Box {
+//        Box {
+//            AsyncImage(
+//                model = productDetails?.image,
+//                contentDescription = "Product Image",
+//                modifier = Modifier
+//                    .fillMaxWidth()
+//                    .height(300.dp)
+//                    .clip(RoundedCornerShape(12.dp)),
+//                contentScale = ContentScale.Crop
+//            )
+//        }
+
+
+        // Decide if it's a network URL or a local URI
+        val productImageModel = remember(productDetails?.image) {
+            productDetails?.image?.let { str ->
+                when {
+                    str.startsWith("http://", true) ||
+                            str.startsWith("https://", true) -> str
+
+                    else -> runCatching { Uri.parse(str) }.getOrNull()
+                }
+            }
+        }
+
+        Box(modifier = Modifier) {
             AsyncImage(
-                model = productDetails?.image,
+                model = productImageModel,
                 contentDescription = "Product Image",
                 modifier = Modifier
                     .fillMaxWidth()
@@ -175,7 +251,8 @@ fun ProductDetailsScreen(
 
             Row(
                 verticalAlignment = Alignment.CenterVertically,
-                modifier = Modifier.background(Color(0xFFFBF1F1))
+                modifier = Modifier
+                    .background(Color(0xFFFBF1F1))
                     .padding(6.dp)
             ) {
                 androidx.compose.material3.Text(
@@ -213,5 +290,6 @@ fun ProductDetailsScreen(
         }
 
         Spacer(modifier = Modifier.height(16.dp))
+    }
     }
 }

@@ -5,6 +5,7 @@ import com.example.smartinventory.utils.ApiResponse
 import kotlinx.coroutines.flow.Flow
 
 interface DashBoardRepository {
-
     suspend fun getProductsList(): Flow<ApiResponse<List<Product>>>
+
+    suspend fun getProductsFromLocal(): Flow<ApiResponse<List<Product>>>
 }

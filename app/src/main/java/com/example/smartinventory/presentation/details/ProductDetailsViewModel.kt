@@ -20,6 +20,10 @@ class ProductDetailsViewModel @Inject constructor(
         MutableStateFlow<ApiResponse<ProductsEntity>>(ApiResponse.Idle)
     val productDetails: StateFlow<ApiResponse<ProductsEntity>> = _productsDetails
 
+    private val _deleteProductState =
+        MutableStateFlow<ApiResponse<Boolean>>(ApiResponse.Idle)
+    val deleteProductState: StateFlow<ApiResponse<Boolean>> = _deleteProductState
+
 
 
 
@@ -28,6 +32,15 @@ class ProductDetailsViewModel @Inject constructor(
         viewModelScope.launch {
             productsRepository.getProductsById(productId).collect { response ->
                 _productsDetails.value = response
+            }
+        }
+    }
+
+    fun deleteProductById(productId: Int) {
+        _deleteProductState.value = ApiResponse.Loading
+        viewModelScope.launch {
+            productsRepository.deleteProduct(productId).collect { response ->
+                _deleteProductState.value = response
             }
         }
     }

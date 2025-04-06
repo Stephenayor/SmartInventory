@@ -55,14 +55,15 @@ import androidx.compose.ui.text.withStyle
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.compose.ui.viewinterop.AndroidView
-import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.NavController
 import com.example.smartinventory.R
 import com.example.smartinventory.data.model.Product
 import com.example.smartinventory.data.model.ProductSales
 import com.example.smartinventory.utils.ApiResponse
 import com.example.smartinventory.utils.CustomLoadingBar
+import com.example.smartinventory.utils.Route
 import com.example.smartinventory.utils.Tools
+import com.example.smartinventory.utils.base.BaseViewModel
 import com.github.mikephil.charting.charts.BarChart
 import com.github.mikephil.charting.charts.PieChart
 import com.github.mikephil.charting.components.XAxis
@@ -75,30 +76,23 @@ import com.github.mikephil.charting.data.PieEntry
 import com.github.mikephil.charting.formatter.IndexAxisValueFormatter
 import com.github.mikephil.charting.renderer.PieChartRenderer
 import com.github.mikephil.charting.utils.ColorTemplate
-import kotlinx.coroutines.delay
 
 
 @Composable
-fun DashBoardScreen(modifier: Modifier = Modifier,
-                    navController: NavController,
-                    dashBoardViewModel: DashBoardViewModel = hiltViewModel()
+fun DashBoardScreen(
+    modifier: Modifier = Modifier,
+    navController: NavController,
+    baseViewModel: BaseViewModel,
+    dashBoardViewModel: DashBoardViewModel
 ) {
 
     //Products
     val productsListState by dashBoardViewModel.productsState.collectAsState()
+    val productsFromLocalState by dashBoardViewModel.productsFromLocalState.collectAsState()
     val products by dashBoardViewModel.dashBoardItems.collectAsState()
     val metricsSummaryState by dashBoardViewModel.summary.collectAsState()
 
-
-
-//
-//    // Products
-//    var productsList by remember { mutableStateOf( Product()) }
-//    var mainCategoriesList = listOf<Categories.CategoriesData>()
-//
-//
     var productsList by remember { mutableStateOf(emptyList<Product>()) }
-//    var filteredFoodsList = listOf<Food.FoodData>()
 
     // UI states
     var isLoading by remember { mutableStateOf(false) }
@@ -111,16 +105,24 @@ fun DashBoardScreen(modifier: Modifier = Modifier,
     var showRetryText by remember { mutableStateOf(false) }
 
     LaunchedEffect(Unit) {
-        dashBoardViewModel.getProductsList()
+//        dashBoardViewModel.getProductsList()
+        if (baseViewModel.isFromAddProduct.value) {
+            dashBoardViewModel.getProductsFromLocal()
+            baseViewModel.setIsFromAddProduct(false)
+        }
+
+        if (productsList.isEmpty()) {
+            dashBoardViewModel.getProductsFromLocal()
+        }
     }
 
 
     Scaffold(
-        bottomBar = { BottomNavigationBar() },
+        bottomBar = { BottomNavigationBar(navController) },
         floatingActionButton = {
             FloatingActionButton(
                 onClick = {
-//                    navController.navigate(Route.CREATE_FOOD_DETAILS_SCREEN)
+                    navController.navigate(Route.ADD_PRODUCT_SCREEN)
                 },
                 containerColor = MaterialTheme.colorScheme.primary,
                 contentColor = MaterialTheme.colorScheme.onPrimary
@@ -138,63 +140,6 @@ fun DashBoardScreen(modifier: Modifier = Modifier,
                 .fillMaxSize()
                 .padding(innerPadding)
         ) {
-
-
-//
-//            when (productsListState) {
-//                is ApiResponse.Loading -> {
-//                    isLoading = true
-//                }
-//                is ApiResponse.Success -> {
-//                    isLoading = false
-//                    // Update the local product list from API response
-//                    productsList = (productsListState as ApiResponse.Success<List<Product>>).data ?: emptyList()
-//                }
-//                is ApiResponse.Failure -> {
-//                    isLoading = false
-//                    dialogMessage = (productsListState as ApiResponse.Failure).message ?: "Something went wrong!"
-//                    isSuccess = false
-//                    showDialog = true
-//                    if ((productsListState as ApiResponse.Failure).message == "No Internet"){
-//                        Tools.showToast(LocalContext.current, "No Internet \nYou may be getting outdated data")
-//                    }
-//                }
-//                else -> Unit
-//            }
-//
-//            LazyColumn(
-//                verticalArrangement = Arrangement.spacedBy(16.dp),
-//                modifier = Modifier.padding(horizontal = 16.dp)
-//            ) {
-//                items(productsList) { product ->
-//                    ProductsItem(product, navController)
-//                }
-//            }
-
-//            when (val state = metricsSummaryState) {
-//                is ApiResponse.Idle -> {
-//
-//                }
-//
-//                is ApiResponse.Loading -> {
-//                    isLoadingCategories = true
-//
-//                }
-//
-//                is ApiResponse.Success -> {
-//                    isLoadingCategories = false
-//                    productsList = state.data?.data!!
-//                    mainCategoriesList = productsList
-//                    foodHomeViewModel.getAllFood()
-//
-//                }
-//
-//                is ApiResponse.Failure -> {
-//                    showRetryText = true
-//                    isLoadingCategories = false
-//                    errorMessage = state.message ?: "An error occurred"
-//                }
-//            }
 
 
             if (isLoading) {
@@ -236,28 +181,26 @@ fun DashBoardScreen(modifier: Modifier = Modifier,
                     ) {
                         CircularProgressIndicator()
                     }
-//                    foodHomeViewModel.clearLoadingState()
+                    dashBoardViewModel.clearLoadingState()
                 }
 
-                Column(Modifier.height(300.dp).padding(16.dp)) {
-                    // ─── Summary Metrics ───────────────────────
-                    Row(horizontalArrangement = Arrangement.spacedBy(12.dp)) {
-                        SummaryCard("Total Items", metricsSummaryState.totalItems.toString())
-                        SummaryCard("Out of Stock", metricsSummaryState.outOfStock.toString())
-                        SummaryCard("Recent Activity", metricsSummaryState.recentActivity)
-                    }
+                Column(Modifier
+                    .height(300.dp)
+                    .padding(16.dp)) {
+//                    Row(horizontalArrangement = Arrangement.spacedBy(12.dp)) {
+//                        SummaryCard("Total Items", metricsSummaryState.totalItems.toString())
+//                        SummaryCard("Out of Stock", metricsSummaryState.outOfStock.toString())
+//                        SummaryCard("Recent Activity", metricsSummaryState.recentActivity)
+//                    }
 
                     Spacer(Modifier.height(24.dp))
 
                     LaunchedEffect(Unit) {
-                        delay(4000)
                     }
 
                     //Pie Chart
 //                    Text("Category Breakdown", style = MaterialTheme.typography.titleMedium)
 //                    PieChartView(products)
-
-
 
                     Spacer(Modifier.height(24.dp))
 
@@ -267,42 +210,6 @@ fun DashBoardScreen(modifier: Modifier = Modifier,
                 }
 
 
-//                OutlinedTextField(
-//                    value = searchQuery,
-//                    onValueChange = { newQuery ->
-//                        searchQuery = newQuery
-//
-//                        val filteredMeals = foodsList.filter {
-//                            it.name?.contains(
-//                                newQuery,
-//                                ignoreCase = true
-//                            ) == true
-//                        }
-//                        filteredFoodsList = if (newQuery.isEmpty()) foodsList else filteredMeals
-//
-//                        val filtered = productsList.filter {
-//                            it.name?.contains(
-//                                newQuery,
-//                                ignoreCase = true
-//                            ) == true
-//                        }
-//                        productsList = if (newQuery.isEmpty()) mainCategoriesList else filtered
-//                    },
-//                    placeholder = {
-//                        Text(
-//                            "Search foods...",
-//                            fontFamily = FontFamily.SansSerif,
-//                            color = Color(0xFF9D9EA1)
-//
-//                        )
-//                    },
-//                    leadingIcon = {
-//                        Icon(Icons.Default.Search, contentDescription = "Search Icon")
-//                    },
-//                    modifier = Modifier
-//                        .fillMaxWidth()
-//                        .background(Color(0xFFF5F6FA), shape = RoundedCornerShape(8.dp))
-//                )
 
                 Spacer(modifier = Modifier.height(16.dp))
 
@@ -340,8 +247,6 @@ fun DashBoardScreen(modifier: Modifier = Modifier,
 //                    )
 //                }
 
-//                FoodListScreen(filteredFoodsList, navController)
-
 
                 when (val productsState = productsListState) {
                     is ApiResponse.Idle -> {
@@ -362,9 +267,33 @@ fun DashBoardScreen(modifier: Modifier = Modifier,
                         dialogMessage = productsState.message ?: "Something went wrong!"
                         isSuccess = false
                         showDialog = true
-                        if (productsState.message == "No Internet"){
-                            Tools.showToast(LocalContext.current, "No Internet \nYou may be getting outdated data")
+                        if (productsState.message == "No Internet") {
+                            Tools.showToast(
+                                LocalContext.current,
+                                "No Internet \nYou may be getting outdated data"
+                            )
                         }
+
+                    }
+                }
+
+                when (val productsFromLocalResponse = productsFromLocalState) {
+                    is ApiResponse.Idle -> {
+
+                    }
+
+                    is ApiResponse.Loading -> {
+                        isLoading = true
+                    }
+
+                    is ApiResponse.Success -> {
+                        isLoading = false
+                        productsList = productsFromLocalResponse.data ?: emptyList()
+                    }
+
+                    is ApiResponse.Failure -> {
+                        isLoading = false
+                        Tools.showToast(LocalContext.current, productsFromLocalResponse.message)
 
                     }
                 }
@@ -395,10 +324,11 @@ fun ProductsItem(product: Product, navController: NavController) {
         colors = CardDefaults.cardColors(containerColor = Color.White),
         border = BorderStroke(0.5.dp, Color(0xFFE0E0E0))
     ) {
-        Column(modifier = Modifier
+        Column(
+            modifier = Modifier
                 .fillMaxWidth()
-            .padding(16.dp)
-        ){
+                .padding(16.dp)
+        ) {
             Row(
                 modifier = Modifier.fillMaxWidth(),
                 horizontalArrangement = Arrangement.SpaceBetween,
@@ -435,8 +365,12 @@ fun ProductsItem(product: Product, navController: NavController) {
                 Text(
                     text = buildAnnotatedString {
                         withStyle(style = SpanStyle(fontWeight = FontWeight.Bold)) {
-                            append(Tools.formatPrice(LocalContext.current,
-                                product.price.toString()).toString())
+                            append(
+                                Tools.formatPrice(
+                                    LocalContext.current,
+                                    product.price.toString()
+                                ).toString()
+                            )
                         }
                     },
                     color = Color.Red,
@@ -468,14 +402,18 @@ fun SummaryCard(title: String, value: String) {
         colors = CardDefaults.cardColors(containerColor = Color.White),
         elevation = CardDefaults.cardElevation(defaultElevation = 4.dp)
     ) {
-        Column(Modifier.padding(16.dp).weight(1f), horizontalAlignment = Alignment.CenterHorizontally) {
+        Column(
+            Modifier
+                .padding(16.dp)
+                .weight(1f),
+            horizontalAlignment = Alignment.CenterHorizontally
+        ) {
             Text(title, style = MaterialTheme.typography.bodySmall, color = Color.Gray)
             Spacer(Modifier.height(4.dp))
             Text(value, style = MaterialTheme.typography.titleLarge, fontWeight = FontWeight.Bold)
         }
     }
 }
-
 
 
 @Composable
@@ -543,10 +481,8 @@ fun BarChartView(products: List<ProductSales>) {
 }
 
 
-
-
 @Composable
-fun BottomNavigationBar() {
+fun BottomNavigationBar(navController: NavController) {
     var selectedItem by remember { mutableIntStateOf(0) }
     val items = listOf("Home", "Reports")
     val icons = listOf(
@@ -558,12 +494,23 @@ fun BottomNavigationBar() {
         items.forEachIndexed { index, item ->
             NavigationBarItem(
                 selected = selectedItem == index,
-                onClick = { selectedItem = index },
+                onClick = {
+                    selectedItem = index
+                    when (item) {
+                        "Home" -> navController.navigate(Route.DASHBOARD_SCREEN) {
+                            popUpTo(Route.DASHBOARD_SCREEN) { inclusive = true }
+                        }
+
+                        "Reports" -> navController.navigate(Route.REPORT_SCREEN) {
+                            popUpTo(Route.REPORT_SCREEN)
+                        }
+                    }
+                },
                 icon = {
                     Icon(
                         painter = icons[index],
                         contentDescription = item,
-                        tint = if (selectedItem == index)  Color.Red else Color.Gray
+                        tint = if (selectedItem == index) Color.Red else Color.Gray
                     )
                 },
                 label = {

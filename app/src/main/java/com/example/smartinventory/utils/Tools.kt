@@ -1,11 +1,14 @@
 package com.example.smartinventory.utils
 
 import android.content.Context
+import android.graphics.Bitmap
 import android.net.ConnectivityManager
-import android.util.Log
+import android.net.Uri
 import android.widget.Toast
 import com.example.smartinventory.R
 import com.google.gson.Gson
+import java.io.File
+import java.io.FileOutputStream
 import java.math.BigDecimal
 import java.text.SimpleDateFormat
 import java.util.Calendar
@@ -82,6 +85,20 @@ class Tools {
                 dateString
             }
         }
+
+        fun saveImageToInternalStorage(context: Context, bitmap: Bitmap): Uri {
+            val filename = "${System.currentTimeMillis()}.jpg"
+            val file = File(context.filesDir, filename)
+            val outputStream = FileOutputStream(file)
+            bitmap.compress(Bitmap.CompressFormat.JPEG, 100, outputStream)
+            outputStream.close()
+            return Uri.fromFile(file)
+        }
+
+        fun generateRandomId(): Int {
+            return (1000..9999).random()
+        }
+
 
     }
 }
