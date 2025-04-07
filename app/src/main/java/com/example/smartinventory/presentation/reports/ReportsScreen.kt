@@ -39,13 +39,16 @@ fun ReportsScreen(
     val breakdown by remember { mutableStateOf(reportsViewModel.categoryBreakdown) }
     val warnings by remember { mutableStateOf(reportsViewModel.lowStockWarnings) }
 
-    Box (
-        modifier = Modifier.fillMaxSize()
+    Box(
+        modifier = Modifier
+            .fillMaxSize()
             .padding(top = 30.dp)
     ) {
-        Column(Modifier
-            .fillMaxSize()
-            .padding(16.dp)) {
+        Column(
+            Modifier
+                .fillMaxSize()
+                .padding(16.dp)
+        ) {
             Text("Quantity Trends (Last 7 Days)", style = MaterialTheme.typography.titleMedium)
             Spacer(Modifier.height(8.dp))
             LineChartView(trend)
@@ -90,31 +93,10 @@ fun LineChartView(data: List<Pair<String, Float>>) {
         chart.invalidate()
     }, modifier = Modifier
         .fillMaxWidth()
-        .height(200.dp))
+        .height(200.dp)
+    )
 }
 
-//@Composable
-//fun PieChartView(data: Map<String, Float>) {
-//    AndroidView(factory = { ctx ->
-//        PieChart(ctx).apply {
-//            description.isEnabled = false
-//            legend.isEnabled = false
-//            setUsePercentValues(false)
-//            setDrawEntryLabels(false)
-//        }
-//    }, update = { chart ->
-//        val entries = data.map { PieEntry(it.value, it.key) }
-//        val set = PieDataSet(entries, "").apply {
-//            colors = ColorTemplate.COLORFUL_COLORS.toList()
-//            valueTextSize = 12f
-//            setDrawValues(false)
-//        }
-//        chart.data = PieData(set)
-//        chart.invalidate()
-//    }, modifier = Modifier
-//        .fillMaxWidth()
-//        .height(200.dp))
-//}
 
 @Composable
 fun PieChartView(data: Map<String, Float>) {

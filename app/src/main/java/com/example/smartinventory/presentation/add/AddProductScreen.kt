@@ -152,65 +152,65 @@ fun AddProductScreen(
 
 
         if (selectedImages.isEmpty()) {
-        Row(
-            modifier = Modifier.fillMaxWidth(),
-            horizontalArrangement = Arrangement.spacedBy(16.dp)
-        ) {
-            Card(
-                modifier = Modifier
-                    .weight(1f)
-                    .clickable { launcherCamera.launch(null) }
-                    .padding(8.dp)
-                    .height(90.dp),
-                shape = RoundedCornerShape(8.dp),
-                border = BorderStroke(1.dp, Color(0xFFE4E7EC)),
-                elevation = 4.dp
+            Row(
+                modifier = Modifier.fillMaxWidth(),
+                horizontalArrangement = Arrangement.spacedBy(16.dp)
             ) {
-                Column(
-                    modifier = Modifier.padding(16.dp),
-                    horizontalAlignment = Alignment.CenterHorizontally
+                Card(
+                    modifier = Modifier
+                        .weight(1f)
+                        .clickable { launcherCamera.launch(null) }
+                        .padding(8.dp)
+                        .height(90.dp),
+                    shape = RoundedCornerShape(8.dp),
+                    border = BorderStroke(1.dp, Color(0xFFE4E7EC)),
+                    elevation = 4.dp
                 ) {
-                    Image(
-                        painter = painterResource(R.drawable.camera),
-                        contentDescription = "Take photo"
-                    )
-                    Text(
-                        text = "Take photo",
-                        color = Color(0xFF1D2433),
-                        modifier = Modifier.padding(top = 5.dp),
-                        fontFamily = FontFamily.SansSerif
-                    )
+                    Column(
+                        modifier = Modifier.padding(16.dp),
+                        horizontalAlignment = Alignment.CenterHorizontally
+                    ) {
+                        Image(
+                            painter = painterResource(R.drawable.camera),
+                            contentDescription = "Take photo"
+                        )
+                        Text(
+                            text = "Take photo",
+                            color = Color(0xFF1D2433),
+                            modifier = Modifier.padding(top = 5.dp),
+                            fontFamily = FontFamily.SansSerif
+                        )
+                    }
                 }
-            }
 
-            Card(
-                modifier = Modifier
-                    .weight(1f)
-                    .clickable { launcherGallery.launch("image/*") }
-                    .padding(8.dp)
-                    .height(90.dp),
-                shape = RoundedCornerShape(8.dp),
-                border = BorderStroke(1.dp, Color.Gray),
-                elevation = 4.dp
-            ) {
-                Column(
-                    modifier = Modifier.padding(16.dp),
-                    horizontalAlignment = Alignment.CenterHorizontally
+                Card(
+                    modifier = Modifier
+                        .weight(1f)
+                        .clickable { launcherGallery.launch("image/*") }
+                        .padding(8.dp)
+                        .height(90.dp),
+                    shape = RoundedCornerShape(8.dp),
+                    border = BorderStroke(1.dp, Color.Gray),
+                    elevation = 4.dp
                 ) {
-                    Image(
-                        painter = painterResource(R.drawable.uploadsimple),
-                        contentDescription = "Upload"
-                    )
-                    Text(
-                        text = "Upload",
-                        color = Color(0xFF1D2433),
-                        modifier = Modifier.padding(top = 5.dp),
-                        fontFamily = FontFamily.SansSerif
-                    )
+                    Column(
+                        modifier = Modifier.padding(16.dp),
+                        horizontalAlignment = Alignment.CenterHorizontally
+                    ) {
+                        Image(
+                            painter = painterResource(R.drawable.uploadsimple),
+                            contentDescription = "Upload"
+                        )
+                        Text(
+                            text = "Upload",
+                            color = Color(0xFF1D2433),
+                            modifier = Modifier.padding(top = 5.dp),
+                            fontFamily = FontFamily.SansSerif
+                        )
+                    }
                 }
             }
         }
-    }
 
         Spacer(modifier = Modifier.height(8.dp))
 
@@ -276,7 +276,7 @@ fun AddProductScreen(
 
         if (isSuccess) {
             Dialog(
-                onDismissRequest = {  },
+                onDismissRequest = { },
                 properties = DialogProperties(usePlatformDefaultWidth = false)
             ) {
                 Box(
@@ -343,7 +343,8 @@ fun AddProductScreen(
             priceRaw = price,
             onPriceRawChange = { price = it }
         )
-        Text(text = "*Digits only", color = Color.Red, fontWeight = FontWeight.Light
+        Text(
+            text = "*Digits only", color = Color.Red, fontWeight = FontWeight.Light
         )
         Spacer(modifier = Modifier.height(20.dp))
 
@@ -363,7 +364,8 @@ fun AddProductScreen(
                 imeAction = ImeAction.Done
             )
         )
-        Text(text = "*Digits only", color = Color.Red, fontWeight = FontWeight.Light
+        Text(
+            text = "*Digits only", color = Color.Red, fontWeight = FontWeight.Light
         )
         Spacer(modifier = Modifier.height(20.dp))
 
@@ -458,7 +460,7 @@ fun DatePickerField(
     ) {
         OutlinedTextField(
             value = date,
-            onValueChange = {  },
+            onValueChange = { },
             textStyle = TextStyle(
                 color = Color.Black
             ),
@@ -475,7 +477,6 @@ fun DatePickerField(
         )
     }
 }
-
 
 
 @Composable
