@@ -30,15 +30,15 @@
 ## How to Run the Project
 
 1. **Download the latest Android Studio**   
-2. **Clone the project from github using this command  git clone https://github.com/Stephenayor/SmartInventory.git
+2. **Clone the project from github using this command  git clone https://github.com/Stephenayor/SmartInventory.git**
 Open the project in android studio
 Run the project on an emulator or a physical device
 
 ## Architecture
-. **This project makes use of MVVM architecture.
-. **The data layer is responsible for communicating with the rest API and housing data for the application.
+- **This project makes use of MVVM architecture.**
+. **The data layer is responsible for communicating with the rest API and housing data for the application.**
 . **Endpoints:
 
-The ViewModel handles the UI logic
-Composables is use for UI display
-Material Designs
+- **The ViewModel handles the UI logic**
+- **Composables is use for UI display**
+- **Material Designs**
