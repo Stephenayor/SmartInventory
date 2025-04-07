@@ -11,8 +11,6 @@
 *Description: The screen for adding products.*
 
 
-*Note: Ensure that the `screenshots` directory contains the above images.*
-
 ## Libraries
 
 - **Kotlin**
@@ -35,3 +33,12 @@
 2. **Clone the project from github using this command  git clone https://github.com/Stephenayor/SmartInventory.git
 Open the project in android studio
 Run the project on an emulator or a physical device
+
+## Architecture
+. **This project makes use of MVVM architecture.
+. **The data layer is responsible for communicating with the rest API and housing data for the application.
+. **Endpoints:
+
+The ViewModel handles the UI logic
+Composables is use for UI display
+Material Designs
