@@ -19,7 +19,6 @@ import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Add
-import androidx.compose.material.icons.filled.Delete
 import androidx.compose.material.icons.filled.Home
 import androidx.compose.material.icons.filled.List
 import androidx.compose.material3.Card
@@ -91,7 +90,6 @@ fun DashBoardScreen(
     val productsFromLocalState by dashBoardViewModel.productsFromLocalState.collectAsState()
     val products by dashBoardViewModel.dashBoardItems.collectAsState()
     val metricsSummaryState by dashBoardViewModel.summary.collectAsState()
-
     var productsList by remember { mutableStateOf(emptyList<Product>()) }
 
     // UI states
@@ -106,9 +104,9 @@ fun DashBoardScreen(
 
     LaunchedEffect(Unit) {
 //        dashBoardViewModel.getProductsList()
-        if (baseViewModel.isFromAddProduct.value) {
+        if (baseViewModel.isProductAction.value) {
             dashBoardViewModel.getProductsFromLocal()
-            baseViewModel.setIsFromAddProduct(false)
+            baseViewModel.setIsProductAction(false)
         }
 
         if (productsList.isEmpty()) {
@@ -340,12 +338,6 @@ fun ProductsItem(product: Product, navController: NavController) {
                     fontSize = 22.sp,
                     color = Color.Black,
                     modifier = Modifier.weight(1f)
-                )
-                Icon(
-                    rememberVectorPainter(Icons.Default.Delete),
-                    contentDescription = "Delete",
-                    tint = Color.LightGray,
-                    modifier = Modifier.size(20.dp)
                 )
             }
 

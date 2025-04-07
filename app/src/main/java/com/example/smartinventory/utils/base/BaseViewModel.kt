@@ -9,10 +9,10 @@ import javax.inject.Inject
 
 @HiltViewModel
 class BaseViewModel @Inject constructor(): ViewModel() {
-  private val _isFromAddProduct = MutableStateFlow(false)
-  val isFromAddProduct: StateFlow<Boolean> = _isFromAddProduct.asStateFlow()
+  private val _isProductAction = MutableStateFlow(false)
+  val isProductAction: StateFlow<Boolean> = _isProductAction.asStateFlow()
 
-  fun setIsFromAddProduct(isFromAddProduct: Boolean) {
-    _isFromAddProduct.value = isFromAddProduct
+  fun setIsProductAction(isFromAddProduct: Boolean) {
+    _isProductAction.value = isFromAddProduct
   }
 }

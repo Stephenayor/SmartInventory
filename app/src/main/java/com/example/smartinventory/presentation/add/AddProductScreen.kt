@@ -18,6 +18,7 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.wrapContentWidth
 import androidx.compose.foundation.lazy.LazyRow
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.rememberScrollState
@@ -30,6 +31,7 @@ import androidx.compose.material.IconButton
 import androidx.compose.material.Text
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.CalendarToday
+import androidx.compose.material.icons.filled.Cancel
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults.buttonColors
 import androidx.compose.material3.OutlinedTextField
@@ -53,6 +55,8 @@ import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.text.input.TextFieldValue
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.compose.ui.window.Dialog
+import androidx.compose.ui.window.DialogProperties
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.NavController
 import coil.compose.rememberAsyncImagePainter
@@ -79,21 +83,19 @@ fun AddProductScreen(
     var selectedImages by remember { mutableStateOf(listOf<Uri>()) }
     var name by remember { mutableStateOf(TextFieldValue("")) }
     var description by remember { mutableStateOf(TextFieldValue("")) }
-//    var quantity by remember { mutableStateOf(TextFieldValue("")) }
     var quantity by remember { mutableStateOf(("")) }
     var price by remember { mutableStateOf("") }
     var supplierInfo by remember { mutableStateOf(TextFieldValue("")) }
-//    var date by remember { mutableStateOf(TextFieldValue("")) }
     var date by remember { mutableStateOf("") }
-    var tags by remember { mutableStateOf(listOf<String>()) }
+    var isSuccess by remember { mutableStateOf(false) }
     val addProductResponse by addProductsViewModel.addProductResponseState.collectAsState()
 
 
-    val isButtonEnabled = name.text.isNotEmpty() &&
+    val enableDisableButton = name.text.isNotEmpty() &&
             description.text.isNotEmpty() && quantity.isNotEmpty()
             && date.isNotEmpty()
-            && supplierInfo.text.isNotEmpty() && price.isNotEmpty()
-    selectedImages.isNotEmpty()
+            && supplierInfo.text.isNotEmpty() && price.isNotEmpty() &&
+            selectedImages.isNotEmpty()
 
     val launcherCamera =
         rememberLauncherForActivityResult(ActivityResultContracts.TakePicturePreview()) { bitmap ->
@@ -147,6 +149,7 @@ fun AddProductScreen(
         }
 
 
+        if (selectedImages.isEmpty()) {
         Row(
             modifier = Modifier.fillMaxWidth(),
             horizontalArrangement = Arrangement.spacedBy(16.dp)
@@ -205,35 +208,43 @@ fun AddProductScreen(
                 }
             }
         }
+    }
 
         Spacer(modifier = Modifier.height(8.dp))
 
 
-        LazyRow(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
-            items(selectedImages) { uri ->
-                Box(
-                    modifier = Modifier
-                        .size(90.dp)
-                        .padding(8.dp)
-                ) {
-                    Image(
-                        painter = rememberAsyncImagePainter(uri),
-                        contentDescription = "Selected Image",
+        Box(
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(vertical = 16.dp),
+            contentAlignment = Alignment.Center
+        ) {
+            LazyRow(modifier = Modifier.wrapContentWidth()) {
+                items(selectedImages) { uri ->
+                    Box(
                         modifier = Modifier
-                            .clip(RoundedCornerShape(16.dp))
-                            .fillMaxSize()
-                    )
-                    IconButton(
-                        onClick = { selectedImages = selectedImages - uri },
-                        modifier = Modifier
-                            .size(25.dp)
-                            .align(Alignment.BottomEnd)
-                            .padding(bottom = 5.dp, end = 5.dp)
+                            .size(150.dp)
+                            .padding(4.dp)
                     ) {
                         Image(
-                            painter = painterResource(R.drawable.closeselectedimage),
-                            contentDescription = "Remove Image"
+                            painter = rememberAsyncImagePainter(uri),
+                            contentDescription = "Selected Image",
+                            modifier = Modifier
+                                .clip(RoundedCornerShape(16.dp))
+                                .fillMaxSize()
                         )
+                        IconButton(
+                            onClick = { selectedImages = selectedImages - uri },
+                            modifier = Modifier
+                                .size(30.dp)
+                                .align(Alignment.BottomEnd)
+                                .padding(bottom = 5.dp, end = 5.dp)
+                        ) {
+                            Image(
+                                Icons.Default.Cancel,
+                                contentDescription = "Remove Image"
+                            )
+                        }
                     }
                 }
             }
@@ -250,10 +261,26 @@ fun AddProductScreen(
 
         when (addProductResponse) {
             is ApiResponse.Success -> {
+                isSuccess = true
+            }
+
+            is ApiResponse.Failure -> {
+                isSuccess = false
+                Tools.showToast(context, (addProductResponse as ApiResponse.Failure).message)
+            }
+
+            else -> Unit
+        }
+
+        if (isSuccess) {
+            Dialog(
+                onDismissRequest = {  },
+                properties = DialogProperties(usePlatformDefaultWidth = false)
+            ) {
                 Box(
-                    modifier = modifier
+                    Modifier
                         .fillMaxSize()
-                        .background(Color(0xFFF5F7FB)),
+                        .background(Color.White),
                     contentAlignment = Alignment.Center
                 ) {
                     SuccessDialog(
@@ -261,19 +288,13 @@ fun AddProductScreen(
                         subtitle = "",
                         buttonText = "Continue",
                         onButtonClick = {
-                            baseViewModel.setIsFromAddProduct(true)
+                            baseViewModel.setIsProductAction(true)
                             navController.navigate(Route.DASHBOARD_SCREEN)
                             navController.popBackStack(Route.ADD_PRODUCT_SCREEN, true)
                         }
                     )
                 }
             }
-
-            is ApiResponse.Failure -> {
-                Tools.showToast(context, (addProductResponse as ApiResponse.Failure).message)
-            }
-
-            else -> Unit
         }
 
 
@@ -287,7 +308,7 @@ fun AddProductScreen(
         OutlinedTextField(
             value = name,
             onValueChange = { name = it },
-            label = { Text("Enter food name") },
+            label = { Text("Enter product name") },
             modifier = Modifier.fillMaxWidth()
         )
         Spacer(modifier = Modifier.height(20.dp))
@@ -353,12 +374,6 @@ fun AddProductScreen(
 
         // Date
         Text(text = "Date")
-//        OutlinedTextField(
-//            value = date,
-//            onValueChange = { date = it },
-//            label = { Text("Enter date") },
-//            modifier = Modifier.fillMaxWidth()
-//        )
         DatePickerField(
             date = date,
             onDateChange = { date = it }
@@ -368,24 +383,22 @@ fun AddProductScreen(
 
         Button(
             onClick = {
-//                addProductsViewModel.addProduct(
-//                    productsEntity = ProductsEntity(
-//                        id = Tools.generateRandomId(),
-//                        name = name.text,
-//                        image = selectedImages.toString(),
-//                        description = description.text,
-//                        quantity = quantity.toInt(),
-//                        price = price.toDouble(),
-//                        supplierInfo = supplierInfo.text,
-//                        lastUpdated = date.toString()
-//                    )
-//                )
-                navController.navigate(Route.DASHBOARD_SCREEN)
-                baseViewModel.setIsFromAddProduct(true)
+                addProductsViewModel.addProduct(
+                    productsEntity = ProductsEntity(
+                        id = Tools.generateRandomId(),
+                        name = name.text,
+                        image = selectedImages.joinToString(",") { it.toString() },
+                        description = description.text,
+                        quantity = quantity.toInt(),
+                        price = price.toDouble(),
+                        supplierInfo = supplierInfo.text,
+                        lastUpdated = date
+                    )
+                )
             },
-            enabled = true,
+            enabled = enableDisableButton,
             colors = buttonColors(
-                containerColor = if (isButtonEnabled) Color.Red else Color(0xFF0E7F0FF),
+                containerColor = if (enableDisableButton) Color.Red else Color(0xFF0E7F0FF),
                 contentColor = Color.White
             ),
             shape = RectangleShape,
@@ -424,22 +437,28 @@ fun DatePickerField(
         )
     }
 
-    OutlinedTextField(
-        value = date,
-        onValueChange = { date },
-        label = { Text("Select Date") },
-        readOnly = true,
-        trailingIcon = {
-            Icon(
-                imageVector = Icons.Default.CalendarToday,
-                contentDescription = "Select date"
-            )
-        },
+    Box(
         modifier = modifier
             .fillMaxWidth()
             .clickable { datePicker.show() }
-    )
+    ) {
+        OutlinedTextField(
+            value = date,
+            onValueChange = {  },
+            label = { Text("Select Date") },
+            readOnly = true,
+            enabled = false,
+            trailingIcon = {
+                Icon(
+                    imageVector = Icons.Default.CalendarToday,
+                    contentDescription = "Select date"
+                )
+            },
+            modifier = Modifier.fillMaxWidth()
+        )
+    }
 }
+
 
 
 @Composable

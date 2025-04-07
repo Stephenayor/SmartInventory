@@ -89,7 +89,7 @@ fun SuccessDialog(
 @Composable
 fun SuccessDialogPreview(modifier: Modifier = Modifier) {
     SuccessDialog(
-        title = "Food Created Successfully",
+        title = "Product Created Successfully",
         subtitle = "Please proceed",
         buttonText = "Continue",
         onButtonClick = {

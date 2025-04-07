@@ -32,7 +32,7 @@ class DashBoardViewModel @Inject constructor(
     val summary: StateFlow<SummaryMetrics> = _summary
 
     init {
-        // Mock data
+        // Mock
         val mock = listOf(
             ProductSales(1, "Gasoline", 50, "Crude", 1000.0, "2025-04-01T12:00:00Z"),
             ProductSales(2, "Premium motor spirit", 0, "Crude", 2000.0, "2025-04-02T08:30:00Z"),

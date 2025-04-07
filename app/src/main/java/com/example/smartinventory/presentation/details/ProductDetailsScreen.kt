@@ -1,6 +1,5 @@
 package com.example.smartinventory.presentation.details
 
-import android.net.Uri
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -34,7 +33,6 @@ import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
-import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -70,8 +68,7 @@ fun ProductDetailsScreen(
     val productDetailsState by productDetailsViewModel.productDetails.collectAsState()
     var productDetails by remember { mutableStateOf<ProductsEntity?>(null) }
     val deleteProductResponseState by productDetailsViewModel.deleteProductState.collectAsState()
-    val snackbarHostState = remember { SnackbarHostState() }
-    val coroutineScope = rememberCoroutineScope()
+    val snackBarHostState = remember { SnackbarHostState() }
 
     //UI States
     var showDialog by remember { mutableStateOf(false) }
@@ -80,7 +77,7 @@ fun ProductDetailsScreen(
     var context = LocalContext.current
 
 
-    Scaffold (snackbarHost = { SnackbarHost(hostState = snackbarHostState) })
+    Scaffold (snackbarHost = { SnackbarHost(hostState = snackBarHostState) })
     { innerPadding ->
 
         LaunchedEffect(Unit) {
@@ -131,7 +128,7 @@ fun ProductDetailsScreen(
                 }
 
                 is ApiResponse.Success -> {
-                    val result = snackbarHostState.showSnackbar(
+                    val result = snackBarHostState.showSnackbar(
                         message = "Product deleted",
                         actionLabel = "OK"
                     )
@@ -140,8 +137,7 @@ fun ProductDetailsScreen(
                     } else {
                         navController.popBackStack()
                     }
-//                    navController.popBackStack()
-                    baseViewModel.setIsFromAddProduct(true)
+                    baseViewModel.setIsProductAction(true)
                 }
 
                 is ApiResponse.Failure -> {
@@ -187,34 +183,9 @@ fun ProductDetailsScreen(
         }
 
         // Product Image
-//        Box {
-//            AsyncImage(
-//                model = productDetails?.image,
-//                contentDescription = "Product Image",
-//                modifier = Modifier
-//                    .fillMaxWidth()
-//                    .height(300.dp)
-//                    .clip(RoundedCornerShape(12.dp)),
-//                contentScale = ContentScale.Crop
-//            )
-//        }
-
-
-        // Decide if it's a network URL or a local URI
-        val productImageModel = remember(productDetails?.image) {
-            productDetails?.image?.let { str ->
-                when {
-                    str.startsWith("http://", true) ||
-                            str.startsWith("https://", true) -> str
-
-                    else -> runCatching { Uri.parse(str) }.getOrNull()
-                }
-            }
-        }
-
-        Box(modifier = Modifier) {
+        Box {
             AsyncImage(
-                model = productImageModel,
+                model = productDetails?.image,
                 contentDescription = "Product Image",
                 modifier = Modifier
                     .fillMaxWidth()
