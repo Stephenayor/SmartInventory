@@ -37,7 +37,7 @@ Run the project on an emulator or a physical device
 
 ## Architecture
 - **This project makes use of MVVM architecture**
-. **The data layer is responsible for communicating with the rest API and housing data for the application.**
+- **The data layer is responsible for communicating with the rest API and housing data for the application**
 - **Endpoints:**
 
 - **The ViewModel handles the UI logic**
