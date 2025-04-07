@@ -33,11 +33,11 @@ import com.github.mikephil.charting.utils.ColorTemplate
 
 @Composable
 fun ReportsScreen(
-    viewModel: ReportsViewModel = hiltViewModel()
+    reportsViewModel: ReportsViewModel = hiltViewModel()
 ) {
-    val trend by remember { mutableStateOf(viewModel.quantityTrend) }
-    val breakdown by remember { mutableStateOf(viewModel.categoryBreakdown) }
-    val warnings by remember { mutableStateOf(viewModel.lowStockWarnings) }
+    val trend by remember { mutableStateOf(reportsViewModel.quantityTrend) }
+    val breakdown by remember { mutableStateOf(reportsViewModel.categoryBreakdown) }
+    val warnings by remember { mutableStateOf(reportsViewModel.lowStockWarnings) }
 
     Box (
         modifier = Modifier.fillMaxSize()
@@ -93,25 +93,56 @@ fun LineChartView(data: List<Pair<String, Float>>) {
         .height(200.dp))
 }
 
+//@Composable
+//fun PieChartView(data: Map<String, Float>) {
+//    AndroidView(factory = { ctx ->
+//        PieChart(ctx).apply {
+//            description.isEnabled = false
+//            legend.isEnabled = false
+//            setUsePercentValues(false)
+//            setDrawEntryLabels(false)
+//        }
+//    }, update = { chart ->
+//        val entries = data.map { PieEntry(it.value, it.key) }
+//        val set = PieDataSet(entries, "").apply {
+//            colors = ColorTemplate.COLORFUL_COLORS.toList()
+//            valueTextSize = 12f
+//            setDrawValues(false)
+//        }
+//        chart.data = PieData(set)
+//        chart.invalidate()
+//    }, modifier = Modifier
+//        .fillMaxWidth()
+//        .height(200.dp))
+//}
+
 @Composable
 fun PieChartView(data: Map<String, Float>) {
-    AndroidView(factory = { ctx ->
-        PieChart(ctx).apply {
-            description.isEnabled = false
-            legend.isEnabled = false
-            setUsePercentValues(false)
-            setDrawEntryLabels(false)
-        }
-    }, update = { chart ->
-        val entries = data.map { PieEntry(it.value, it.key) }
-        val set = PieDataSet(entries, "").apply {
-            colors = ColorTemplate.COLORFUL_COLORS.toList()
-            valueTextSize = 12f
-            setDrawValues(false)
-        }
-        chart.data = PieData(set)
-        chart.invalidate()
-    }, modifier = Modifier
-        .fillMaxWidth()
-        .height(200.dp))
+    AndroidView(
+        factory = { ctx ->
+            PieChart(ctx).apply {
+                description.isEnabled = false
+                legend.isEnabled = false
+                setUsePercentValues(false)
+                setDrawEntryLabels(true)
+                setEntryLabelTextSize(12f)
+                setEntryLabelColor(android.graphics.Color.BLACK)
+            }
+        },
+        update = { chart ->
+            val entries = data.map { (category, value) ->
+                PieEntry(value, category)
+            }
+            val set = PieDataSet(entries, "").apply {
+                colors = ColorTemplate.COLORFUL_COLORS.toList()
+                valueTextSize = 12f
+                setDrawValues(false)
+            }
+            chart.data = PieData(set)
+            chart.invalidate()
+        },
+        modifier = Modifier
+            .fillMaxWidth()
+            .height(200.dp)
+    )
 }

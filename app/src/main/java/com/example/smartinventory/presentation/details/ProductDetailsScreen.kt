@@ -137,7 +137,7 @@ fun ProductDetailsScreen(
                     } else {
                         navController.popBackStack()
                     }
-                    baseViewModel.setIsProductAction(true)
+                    baseViewModel.setIsProductRelatedAction(true)
                 }
 
                 is ApiResponse.Failure -> {

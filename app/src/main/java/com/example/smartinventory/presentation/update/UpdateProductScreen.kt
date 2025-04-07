@@ -1,4 +1,4 @@
-package com.example.smartinventory.presentation.add
+package com.example.smartinventory.presentation.update
 
 import android.app.DatePickerDialog
 import android.net.Uri
@@ -52,6 +52,7 @@ import androidx.compose.ui.graphics.RectangleShape
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontFamily
+import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.text.input.TextFieldValue
@@ -64,6 +65,7 @@ import androidx.navigation.NavController
 import coil.compose.rememberAsyncImagePainter
 import com.example.smartinventory.R
 import com.example.smartinventory.data.database.ProductsEntity
+import com.example.smartinventory.presentation.add.AddProductsViewModel
 import com.example.smartinventory.utils.ApiResponse
 import com.example.smartinventory.utils.CustomLoadingBar
 import com.example.smartinventory.utils.Route
@@ -345,7 +347,7 @@ fun UpdateProductScreen(
                         subtitle = "",
                         buttonText = "Continue",
                         onButtonClick = {
-                            baseViewModel.setIsProductAction(true)
+                            baseViewModel.setIsProductRelatedAction(true)
                             navController.navigate(Route.DASHBOARD_SCREEN)
                             navController.popBackStack(Route.ADD_PRODUCT_SCREEN, true)
                         }
@@ -436,6 +438,13 @@ fun UpdateProductScreen(
             onDateChange = { date = it }
         )
         Spacer(modifier = Modifier.height(20.dp))
+
+        Text(
+            text = "All Fields are Required*",
+            fontWeight = FontWeight.SemiBold,
+            color = Color.Red
+        )
+        Spacer(modifier = Modifier.height(10.dp))
 
 
         Button(

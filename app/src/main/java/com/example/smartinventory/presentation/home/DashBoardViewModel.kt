@@ -42,12 +42,12 @@ class DashBoardViewModel @Inject constructor(
         _summary.value = SummaryMetrics(
             totalItems = mock.size,
             outOfStock = mock.count { it.quantity == 0 },
-            recentActivity = "Last update just now"
+            recentActivity = "Last week"
         )
         getProductsList()
     }
 
-    private fun getProductsList() {
+     fun getProductsList() {
         _productsState.value = ApiResponse.Loading
         viewModelScope.launch {
             dashBoardRepository.getProductsList().collect { response ->

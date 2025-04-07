@@ -9,7 +9,7 @@ import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
 import androidx.navigation.navArgument
 import com.example.smartinventory.presentation.add.AddProductScreen
-import com.example.smartinventory.presentation.add.UpdateProductScreen
+import com.example.smartinventory.presentation.update.UpdateProductScreen
 import com.example.smartinventory.presentation.details.ProductDetailsScreen
 import com.example.smartinventory.presentation.home.DashBoardScreen
 import com.example.smartinventory.presentation.home.DashBoardViewModel

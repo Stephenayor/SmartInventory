@@ -49,7 +49,9 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.RectangleShape
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.FontFamily
+import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.text.input.TextFieldValue
@@ -288,7 +290,7 @@ fun AddProductScreen(
                         subtitle = "",
                         buttonText = "Continue",
                         onButtonClick = {
-                            baseViewModel.setIsProductAction(true)
+                            baseViewModel.setIsProductRelatedAction(true)
                             navController.navigate(Route.DASHBOARD_SCREEN)
                             navController.popBackStack(Route.ADD_PRODUCT_SCREEN, true)
                         }
@@ -341,6 +343,8 @@ fun AddProductScreen(
             priceRaw = price,
             onPriceRawChange = { price = it }
         )
+        Text(text = "*Digits only", color = Color.Red, fontWeight = FontWeight.Light
+        )
         Spacer(modifier = Modifier.height(20.dp))
 
 
@@ -358,6 +362,8 @@ fun AddProductScreen(
                 keyboardType = KeyboardType.Number,
                 imeAction = ImeAction.Done
             )
+        )
+        Text(text = "*Digits only", color = Color.Red, fontWeight = FontWeight.Light
         )
         Spacer(modifier = Modifier.height(20.dp))
 
@@ -378,7 +384,15 @@ fun AddProductScreen(
             date = date,
             onDateChange = { date = it }
         )
-        Spacer(modifier = Modifier.height(20.dp))
+        Spacer(modifier = Modifier.height(30.dp))
+
+
+        Text(
+            text = "All Fields are Required and Ensure to Add Image*",
+            fontWeight = FontWeight.SemiBold,
+            color = Color.Red
+        )
+        Spacer(modifier = Modifier.height(10.dp))
 
 
         Button(
@@ -404,7 +418,7 @@ fun AddProductScreen(
             shape = RectangleShape,
             modifier = Modifier
                 .fillMaxWidth()
-                .height(60.dp)
+                .height(70.dp)
                 .padding(top = 15.dp)
         ) {
             Text(text = "Add Item")
@@ -445,6 +459,9 @@ fun DatePickerField(
         OutlinedTextField(
             value = date,
             onValueChange = {  },
+            textStyle = TextStyle(
+                color = Color.Black
+            ),
             label = { Text("Select Date") },
             readOnly = true,
             enabled = false,
@@ -467,7 +484,7 @@ fun PriceTextField(
     onPriceRawChange: (String) -> Unit,
     modifier: Modifier = Modifier
 ) {
-    // Format with separators
+    val context = LocalContext.current
     val formatted = remember(priceRaw) {
         if (priceRaw.isEmpty()) ""
         else {
@@ -484,6 +501,9 @@ fun PriceTextField(
         value = formatted,
         onValueChange = { input ->
             val digits = input.filter { it.isDigit() }
+            if (input != digits && digits.isNotEmpty()) {
+                Tools.showToast(context, "Only numbers are allowed")
+            }
             onPriceRawChange(digits)
         },
         modifier = modifier.fillMaxWidth(),

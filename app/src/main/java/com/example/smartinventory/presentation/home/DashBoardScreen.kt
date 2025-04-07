@@ -2,6 +2,7 @@ package com.example.smartinventory.presentation.home
 
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.Image
+import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -14,6 +15,7 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.layout.wrapContentHeight
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.RoundedCornerShape
@@ -50,6 +52,7 @@ import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.SpanStyle
 import androidx.compose.ui.text.buildAnnotatedString
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.withStyle
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
@@ -60,6 +63,7 @@ import com.example.smartinventory.data.model.Product
 import com.example.smartinventory.data.model.ProductSales
 import com.example.smartinventory.utils.ApiResponse
 import com.example.smartinventory.utils.CustomLoadingBar
+import com.example.smartinventory.utils.NetworkConnectivityObserver
 import com.example.smartinventory.utils.Route
 import com.example.smartinventory.utils.Tools
 import com.example.smartinventory.utils.base.BaseViewModel
@@ -85,10 +89,10 @@ fun DashBoardScreen(
     dashBoardViewModel: DashBoardViewModel
 ) {
 
-    //Products
+    val context = LocalContext.current
     val productsListState by dashBoardViewModel.productsState.collectAsState()
     val productsFromLocalState by dashBoardViewModel.productsFromLocalState.collectAsState()
-    val products by dashBoardViewModel.dashBoardItems.collectAsState()
+    val dashBoardItems by dashBoardViewModel.dashBoardItems.collectAsState()
     val metricsSummaryState by dashBoardViewModel.summary.collectAsState()
     var productsList by remember { mutableStateOf(emptyList<Product>()) }
 
@@ -98,15 +102,16 @@ fun DashBoardScreen(
     var showDialog by remember { mutableStateOf(false) }
     var dialogMessage by remember { mutableStateOf("") }
     var isSuccess by remember { mutableStateOf(true) }
-    var searchQuery by remember { mutableStateOf("") }
+    val connectivityObserver = remember { NetworkConnectivityObserver(context) }
+    val isOnline by connectivityObserver.observe().collectAsState(initial = true)
     var errorMessage by remember { mutableStateOf("") }
     var showRetryText by remember { mutableStateOf(false) }
 
     LaunchedEffect(Unit) {
 //        dashBoardViewModel.getProductsList()
-        if (baseViewModel.isProductAction.value) {
+        if (baseViewModel.isProductRelatedAction.value) {
             dashBoardViewModel.getProductsFromLocal()
-            baseViewModel.setIsProductAction(false)
+            baseViewModel.setIsProductRelatedAction(false)
         }
 
         if (productsList.isEmpty()) {
@@ -116,6 +121,23 @@ fun DashBoardScreen(
 
 
     Scaffold(
+        topBar = {
+            if (!isOnline) {
+                Text(
+                    "You are offline",
+                    color = Color.White,
+                    fontWeight = FontWeight.Bold,
+                    fontSize = 16.sp,
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .background(Color.Red)
+                        .padding(8.dp),
+                    textAlign = TextAlign.Center
+                )
+            } else {
+
+            }
+        },
         bottomBar = { BottomNavigationBar(navController) },
         floatingActionButton = {
             FloatingActionButton(
@@ -182,31 +204,23 @@ fun DashBoardScreen(
                     dashBoardViewModel.clearLoadingState()
                 }
 
-                Column(Modifier
-                    .height(300.dp)
-                    .padding(16.dp)) {
-//                    Row(horizontalArrangement = Arrangement.spacedBy(12.dp)) {
-//                        SummaryCard("Total Items", metricsSummaryState.totalItems.toString())
-//                        SummaryCard("Out of Stock", metricsSummaryState.outOfStock.toString())
-//                        SummaryCard("Recent Activity", metricsSummaryState.recentActivity)
-//                    }
-
-                    Spacer(Modifier.height(24.dp))
-
-                    LaunchedEffect(Unit) {
+                Column(
+                    Modifier
+                        .wrapContentHeight()
+                        .padding(12.dp)
+                ) {
+                    Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+                        SummaryCard("Total Items", metricsSummaryState.totalItems.toString())
+                        SummaryCard("Out of Stock", metricsSummaryState.outOfStock.toString())
+                        SummaryCard("Recent Activity", metricsSummaryState.recentActivity)
                     }
-
-                    //Pie Chart
-//                    Text("Category Breakdown", style = MaterialTheme.typography.titleMedium)
-//                    PieChartView(products)
 
                     Spacer(Modifier.height(24.dp))
 
                     // Bar Chart
-                    Text("Stock Levels by Category", style = MaterialTheme.typography.titleMedium)
-                    BarChartView(products)
+                    Text("Stock Levels", style = MaterialTheme.typography.titleMedium)
+                    BarChartView(dashBoardItems)
                 }
-
 
 
                 Spacer(modifier = Modifier.height(16.dp))
@@ -397,7 +411,7 @@ fun SummaryCard(title: String, value: String) {
         Column(
             Modifier
                 .padding(16.dp)
-                .weight(1f),
+                .height(50.dp),
             horizontalAlignment = Alignment.CenterHorizontally
         ) {
             Text(title, style = MaterialTheme.typography.bodySmall, color = Color.Gray)
@@ -408,62 +422,52 @@ fun SummaryCard(title: String, value: String) {
 }
 
 
-@Composable
-fun PieChartView(products: List<ProductSales>) {
-    val counts = products.groupingBy { it.category }.eachCount()
-    AndroidView(
-        factory = { ctx ->
-            PieChart(ctx).apply {
-                description.isEnabled = false
-                legend.isEnabled = false
-                setDrawEntryLabels(false)
-                isDrawHoleEnabled = true
-            }
-        },
-        update = { chart ->
-            val counts = products.groupingBy { it.category }.eachCount()
-            val entries = counts.map { PieEntry(it.value.toFloat(), it.key) }
-            val set = PieDataSet(entries, "").apply {
-                colors = ColorTemplate.MATERIAL_COLORS.toList()
-                valueTextSize = 12f
-                setDrawValues(false)      // no values on slices
-            }
-            chart.data = PieData(set)
-
-            chart.renderer = PieChartRenderer(chart, chart.animator, chart.viewPortHandler)
-
-            chart.invalidate()
-        },
-        modifier = Modifier
-            .fillMaxWidth()
-            .height(200.dp)
-    )
-}
 
 @Composable
 fun BarChartView(products: List<ProductSales>) {
-    // Sum quantities per category
-    val sums = products.groupBy { it.category }
-        .mapValues { it.value.sumOf { p -> p.quantity } }
-
     AndroidView(
         factory = { ctx ->
             BarChart(ctx).apply {
                 description.isEnabled = false
                 axisRight.isEnabled = false
+
                 xAxis.position = XAxis.XAxisPosition.BOTTOM
+
+                setDrawBorders(true)
+                setDrawGridBackground(false)
+
+                axisLeft.axisMinimum = 0f
+
+                axisRight.isEnabled = false
+
+                xAxis.granularity = 1f
+                xAxis.setDrawGridLines(false)
+
+                axisLeft.setDrawGridLines(true)
             }
         },
         update = { chart ->
-            val entries = sums.entries.mapIndexed { i, (cat, sum) ->
-                BarEntry(i.toFloat(), sum.toFloat())
+            val entries = products.mapIndexed { index, product ->
+                BarEntry(index.toFloat(), product.quantity.toFloat())
             }
-            val set = BarDataSet(entries, "").apply {
+
+            val dataSet = BarDataSet(entries, "Quantity").apply {
                 colors = ColorTemplate.COLORFUL_COLORS.toList()
                 valueTextSize = 12f
+                setDrawValues(true)
             }
-            chart.data = BarData(set).apply { barWidth = 0.5f }
-            chart.xAxis.valueFormatter = IndexAxisValueFormatter(sums.keys.toList())
+
+            val barData = BarData(dataSet).apply {
+                barWidth = 0.5f
+            }
+
+            chart.data = barData
+
+            val productNames = products.map { it.name }
+            chart.xAxis.valueFormatter = IndexAxisValueFormatter(productNames)
+            chart.xAxis.axisMinimum = -0.5f
+            chart.xAxis.axisMaximum = entries.size - 0.5f
+
             chart.invalidate()
         },
         modifier = Modifier

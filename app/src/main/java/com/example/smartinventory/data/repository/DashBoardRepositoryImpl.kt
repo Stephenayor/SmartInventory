@@ -31,7 +31,7 @@ class DashBoardRepositoryImpl @Inject constructor(
                     webService.getProducts(AppConstants.PRODUCT_PATH)
                 if (response.isSuccessful) {
                     val products = response.body() ?: emptyList()
-                    // Update the Room DB
+                    // Update the DB
                     productDao.insertProducts(products.toProductEntityList())
                     emit(ApiResponse.Success(products))
                 } else {

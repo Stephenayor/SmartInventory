@@ -10,9 +10,9 @@ import javax.inject.Inject
 @HiltViewModel
 class BaseViewModel @Inject constructor(): ViewModel() {
   private val _isProductAction = MutableStateFlow(false)
-  val isProductAction: StateFlow<Boolean> = _isProductAction.asStateFlow()
+  val isProductRelatedAction: StateFlow<Boolean> = _isProductAction.asStateFlow()
 
-  fun setIsProductAction(isFromAddProduct: Boolean) {
+  fun setIsProductRelatedAction(isFromAddProduct: Boolean) {
     _isProductAction.value = isFromAddProduct
   }
 }

@@ -6,7 +6,7 @@ import javax.inject.Inject
 
 @HiltViewModel
 class ReportsViewModel @Inject constructor(): ViewModel() {
-  // Sample trend: quantity over 7 days
+  // Sample trend
   val quantityTrend = listOf(
     Pair("Mon", 50f),
     Pair("Tue", 45f),
@@ -19,16 +19,16 @@ class ReportsViewModel @Inject constructor(): ViewModel() {
 
   // Sample category breakdown
   val categoryBreakdown = mapOf(
-    "Fruits" to 120f,
-    "Vegetables" to 80f,
-    "Dairy" to 50f,
-    "Snacks" to 30f
+    "Fuel" to 120f,
+    "Diesel" to 80f,
+    "Petrol" to 50f,
+    "Gas" to 30f
   )
 
-  // Low stock threshold
+  // Low stock threshold mock data
   val lowStockWarnings = listOf(
-    "Tomatoes (5 units)",
-    "Milk (2 units)",
-    "Chips (3 units)"
+    "Diesel (5 units)",
+    "Premium Motor Spirit (2 units)",
+    "LPG (3 units)"
   )
 }
