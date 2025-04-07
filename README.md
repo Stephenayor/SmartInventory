@@ -3,7 +3,8 @@
 ## Screenshots
 
 
-![Food Home Screen]<img width="299" alt="Screenshot 2025-03-18 at 10 37 54" src="https://github.com/user-attachments/assets/de4d6038-d37e-4817-b03b-fc9d1970acdb" />
+![Reports Screen]<<img width="222" alt="Screenshot 2025-04-07 at 22 27 31" src="https://github.com/user-attachments/assets/0d6c7e8f-cd69-4834-94cf-5165ce79c289" />
+ />
 *Description: The page containing reports and products summary.*
 
 ![Add Item Screen]<<img width="222" alt="Screenshot 2025-04-07 at 20 44 18" src="https://github.com/user-attachments/assets/1b12fb71-6f97-4411-b22b-4e425d0dc6f1" />
