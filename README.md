@@ -39,6 +39,7 @@ Run the project on an emulator or a physical device
 - **This project makes use of MVVM architecture**
 - **The data layer is responsible for communicating with the rest API and housing data for the application**
 - **Endpoints:**
+  - **GET/{products}* this endpoint returns a mocked list of products 
 
 - **The ViewModel handles the UI logic**
 - **Composables is use for UI display**
