@@ -44,7 +44,6 @@ class DashBoardRepositoryImpl @Inject constructor(
                         )
                     )
                     // We fallback to local storage
-                    var productList: List<Product> = listOf()
                     val localProducts = productDao.getAllProducts().first()
                     emit(ApiResponse.Success(localProducts.toProduct()))
                 }

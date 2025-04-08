@@ -68,16 +68,11 @@ import com.example.smartinventory.utils.Route
 import com.example.smartinventory.utils.Tools
 import com.example.smartinventory.utils.base.BaseViewModel
 import com.github.mikephil.charting.charts.BarChart
-import com.github.mikephil.charting.charts.PieChart
 import com.github.mikephil.charting.components.XAxis
 import com.github.mikephil.charting.data.BarData
 import com.github.mikephil.charting.data.BarDataSet
 import com.github.mikephil.charting.data.BarEntry
-import com.github.mikephil.charting.data.PieData
-import com.github.mikephil.charting.data.PieDataSet
-import com.github.mikephil.charting.data.PieEntry
 import com.github.mikephil.charting.formatter.IndexAxisValueFormatter
-import com.github.mikephil.charting.renderer.PieChartRenderer
 import com.github.mikephil.charting.utils.ColorTemplate
 
 
@@ -92,8 +87,8 @@ fun DashBoardScreen(
     val context = LocalContext.current
     val productsListState by dashBoardViewModel.productsState.collectAsState()
     val productsFromLocalState by dashBoardViewModel.productsFromLocalState.collectAsState()
-    val dashBoardItems by dashBoardViewModel.dashBoardItems.collectAsState()
-    val metricsSummaryState by dashBoardViewModel.summary.collectAsState()
+    val dashBoardItems by dashBoardViewModel.productSales.collectAsState()
+    val metricsSummaryState by dashBoardViewModel.metricsSummary.collectAsState()
     var productsList by remember { mutableStateOf(emptyList<Product>()) }
 
     // UI states
@@ -104,11 +99,9 @@ fun DashBoardScreen(
     var isSuccess by remember { mutableStateOf(true) }
     val connectivityObserver = remember { NetworkConnectivityObserver(context) }
     val isOnline by connectivityObserver.observe().collectAsState(initial = true)
-    var errorMessage by remember { mutableStateOf("") }
-    var showRetryText by remember { mutableStateOf(false) }
+
 
     LaunchedEffect(Unit) {
-//        dashBoardViewModel.getProductsList()
         if (baseViewModel.isProductRelatedAction.value) {
             dashBoardViewModel.getProductsFromLocal()
             baseViewModel.setIsProductRelatedAction(false)
@@ -134,8 +127,6 @@ fun DashBoardScreen(
                         .padding(8.dp),
                     textAlign = TextAlign.Center
                 )
-            } else {
-
             }
         },
         bottomBar = { BottomNavigationBar(navController) },
@@ -224,41 +215,6 @@ fun DashBoardScreen(
 
 
                 Spacer(modifier = Modifier.height(16.dp))
-
-
-//                if (showRetryText) {
-//                    val annotatedText = buildAnnotatedString {
-//                        append(errorMessage)
-//                        append("\n")
-//                        pushStringAnnotation(tag = "retry", annotation = "retry")
-//                        withStyle(
-//                            style = SpanStyle(
-//                                color = Color.Blue,
-//                                textDecoration = TextDecoration.Underline
-//                            )
-//                        ) {
-//                            append("Please Retry")
-//                        }
-//                        pop()
-//                    }
-//
-//                    ClickableText(
-//                        text = annotatedText,
-//                        onClick = { offset ->
-//                            annotatedText.getStringAnnotations(
-//                                tag = "retry",
-//                                start = offset,
-//                                end = offset
-//                            )
-//                                .firstOrNull()?.let {
-//                                    // Trigger the retry action
-//                                    foodHomeViewModel.getCategories()
-//                                }
-//                        },
-//                        style = MaterialTheme.typography.bodyLarge.copy(fontSize = 16.sp)
-//                    )
-//                }
-
 
                 when (val productsState = productsListState) {
                     is ApiResponse.Idle -> {
@@ -420,7 +376,6 @@ fun SummaryCard(title: String, value: String) {
         }
     }
 }
-
 
 
 @Composable

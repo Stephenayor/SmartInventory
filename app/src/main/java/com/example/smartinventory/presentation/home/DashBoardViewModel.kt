@@ -25,29 +25,29 @@ class DashBoardViewModel @Inject constructor(
         MutableStateFlow<ApiResponse<List<Product>>>(ApiResponse.Idle)
     val productsFromLocalState: StateFlow<ApiResponse<List<Product>>> = _productsFromLocalState
 
-    private val _dashBoardItems = MutableStateFlow<List<ProductSales>>(emptyList())
-    val dashBoardItems: StateFlow<List<ProductSales>> = _dashBoardItems
+    private val _productSales = MutableStateFlow<List<ProductSales>>(emptyList())
+    val productSales: StateFlow<List<ProductSales>> = _productSales
 
-    private val _summary = MutableStateFlow(SummaryMetrics(0, 0, ""))
-    val summary: StateFlow<SummaryMetrics> = _summary
+    private val _metricsSummary = MutableStateFlow(SummaryMetrics(0, 0, ""))
+    val metricsSummary: StateFlow<SummaryMetrics> = _metricsSummary
 
     init {
-        // Mock
-        val mock = listOf(
+        // Mock data
+        val itemsMockData = listOf(
             ProductSales(1, "Gasoline", 50, "Crude", 1000.0, "2025-04-01T12:00:00Z"),
             ProductSales(2, "Premium motor spirit", 0, "Crude", 2000.0, "2025-04-02T08:30:00Z"),
             ProductSales(3, "Liquefied Fuel", 20, "Fuel", 3000.0, "2025-04-02T08:30:00Z")
         )
-        _dashBoardItems.value = mock
-        _summary.value = SummaryMetrics(
-            totalItems = mock.size,
-            outOfStock = mock.count { it.quantity == 0 },
+        _productSales.value = itemsMockData
+        _metricsSummary.value = SummaryMetrics(
+            totalItems = itemsMockData.size,
+            outOfStock = itemsMockData.count { it.quantity == 0 },
             recentActivity = "Last week"
         )
         getProductsList()
     }
 
-     fun getProductsList() {
+     private fun getProductsList() {
         _productsState.value = ApiResponse.Loading
         viewModelScope.launch {
             dashBoardRepository.getProductsList().collect { response ->
